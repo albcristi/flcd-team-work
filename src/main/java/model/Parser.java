@@ -15,7 +15,8 @@ public class Parser {
         this.firstTable = new HashMap<>();
         this.followTable = new HashMap<>();
         this.generateFirstTable();
-        System.out.println(firstTable);
+        this.generateFollowTable();
+        System.out.println(this.followTable);
     }
 
     private void generateFirstTable(){
@@ -24,7 +25,7 @@ public class Parser {
            will generate the first table
          */
         for (String nonTerminal : grammar.getNonTerminals()) {
-            this.firstTable.put(nonTerminal, this.firstOf(nonTerminal));
+            this.firstTable.put(nonTerminal, this.toSet(this.firstOf(nonTerminal)));
         }
     }
 
@@ -88,12 +89,86 @@ public class Parser {
         return -1;
     }
 
+    private List<String> toSet(List<String> lst){
+        /*
+        Gets the set version of a list
+         */
+        List<String> set = new ArrayList<>();
+        for(String element: lst)
+            if(!set.contains(element))
+                set.add(element);
+        return set;
+    }
     private void generateFollowTable(){
          /*
            Function that, based on the FOLLOW algorithm,
            will generate the follow table
          */
+         for(String nonTerminal: this.grammar.getNonTerminals())
+             this.followTable.put(nonTerminal, toSet(this.followOf(nonTerminal)));
 
+    }
+
+    private List<String> followOf(String nonTerminal){
+        List<String> values = new ArrayList<>();
+        if(nonTerminal.equals(this.grammar.getStartingSymbol()))
+            values.add("ε");
+
+        for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
+            List<String> components = Arrays.asList(pair.rule.split(" "));
+            Integer index =  components.indexOf(nonTerminal);
+            if(index == components.size()-1){
+                if(nonTerminal == pair.key)
+                    return values;
+                else {
+                    values.addAll(followOf(pair.key));
+                }
+            }
+            else{
+                List<String> firstOfRight = firstOfSequence(components.subList(index+1, components.size()));
+                if(firstOfRight.contains("ε")){
+                    values.addAll(toSet(firstOfRight));
+                    values.addAll(followOf(pair.key));
+                    values = toSet(values);
+
+                }
+                values.addAll(toSet(firstOfRight));
+                values = toSet(values);
+            }
+        }
+        return toSet(values);
+    }
+
+    public List<String> firstOfSequence(List<String> sequence) {
+        List<String> result = new ArrayList<>();
+        result.add("ε");
+        boolean ok = false;
+        for (String element : sequence) {
+            List<String> firstOf = new ArrayList<>();
+            if (grammar.getTerminals().contains(element)) {
+                firstOf.add(element);
+                ok = true;
+            }
+            else {
+                firstOf = toSet(this.firstTable.get(element));
+            }
+            result = plusWithCircle(result, firstOf);
+
+            if(ok || !firstOf.contains("ε"))
+                return toSet(result);
+        }
+        return toSet(result);
+    }
+
+    public List<String> plusWithCircle(List<String> l1, List<String> l2){
+        List<String> result = new ArrayList<>();
+        if(l1.contains("ε")){
+            result.addAll(l1);
+            result.remove("ε");
+            result.addAll(l2);
+            return toSet(result);
+        }
+        return toSet(l1);
     }
 
     private void generateParseTable(){

@@ -9,6 +9,7 @@ public class Grammar {
     List<String> nonTerminals;
     HashMap<String, List<String>> productions;
     String pathToFile;
+    String startingSymbol;
 
     public Grammar(String pathToFile){
         terminals = new ArrayList<>();
@@ -16,6 +17,10 @@ public class Grammar {
         productions = new HashMap<>();
         this.pathToFile = pathToFile;
         readFromFile();
+    }
+
+    public String getStartingSymbol(){
+        return this.startingSymbol;
     }
 
     public List<String> getTerminals() {
@@ -68,6 +73,7 @@ public class Grammar {
 
                 }
             }
+            this.startingSymbol = this.nonTerminals.get(0);
             reader.close();
             System.out.println(productions);
         }
@@ -75,7 +81,19 @@ public class Grammar {
             System.out.println(e.getMessage());
         }
 
+    }
 
+    public List<Pair> getRulesThatContainNonTerminal(String nonTerminal){
+        List<Pair> result = new ArrayList<>();
+        for(String  key: productions.keySet())
+            for(String production: productions.get(key))
+                if(production.contains(nonTerminal)){
+                    Pair p = new Pair();
+                    p.key=key;
+                    p.rule=production;
+                    result.add(p);
+                }
+        return result;
     }
 }
 

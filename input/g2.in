@@ -1,0 +1,5 @@
+S,A,B
+a,c,d,f,e
+S -> A B a | B A c
+A -> d | e | ε
+B -> f | ε

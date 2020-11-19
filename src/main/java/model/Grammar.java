@@ -51,7 +51,7 @@ public class Grammar {
                     break;
                 }
                 List<String> splitV1 = Arrays.asList(line.strip().split("->"));
-                String nonTerminal = splitV1.get(0);
+                String nonTerminal = splitV1.get(0).strip();
                 // split based on "|"
                 List<String> rightSide = Arrays.asList(splitV1.get(1).strip().split("\\|"));
                 for(String element: rightSide){

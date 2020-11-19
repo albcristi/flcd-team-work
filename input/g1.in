@@ -1,4 +1,7 @@
-S,A
-a,b,c
-S-> aSbS | aS | c
-A-> a | ε
+S,A,B,C,D
+a,(,),+,*
+S -> B A
+A -> + B A | ε
+B -> D C
+C -> * D C | ε
+D -> ( S ) | a

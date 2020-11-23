@@ -5,7 +5,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("aaa");
-        Grammar g = new Grammar("./input/g1.in");
+        Grammar g = new Grammar("./input/g2.in");
         System.out.println("Grammar non-terminals");
         System.out.println(g.getNonTerminals());
         System.out.println("Grammar terminals");

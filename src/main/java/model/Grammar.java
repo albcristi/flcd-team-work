@@ -46,7 +46,13 @@ public class Grammar {
             BufferedReader reader = new BufferedReader(new FileReader(this.pathToFile));
             String lineOfNonTerminals = reader.readLine();
             List<String> nonTerminals = Arrays.asList(lineOfNonTerminals.split(","));
-            List<String> terminals = Arrays.asList(reader.readLine().split(","));
+            List<String> terminalsFromFile = Arrays.asList(reader.readLine().split(","));
+            List<String> terminals = new ArrayList<>();
+            terminals.addAll(terminalsFromFile);
+            String flag = reader.readLine();
+            if(flag.equals("true")){
+                terminals.add(",");
+            }
             this.nonTerminals = nonTerminals;
             this.terminals = terminals;
             // now we read the productions

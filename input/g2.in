@@ -1,6 +1,40 @@
-S,A,B,C
-(,),int,+,*
-S -> A B
-A -> ( S ) | int C
-B -> + S | ε
-C -> * A | ε
+Stmtlist,Stmt,Declist,Ifstmt,Forstmt,Assignstmt,Returnstmt,Iostmt,Decl,Type,Identifier,Continuation,SimpType,UserType,PosNumber,Condition,Else,Expression,Relation,Forcond,Forbody,Istmt,Ostmt,IntIstmt,StringIstmt,IntOstmt,StringOstmt,IntParam,NumConst,StrParam,StrConst,ArithmExpr,StringExpr,Exp2,Exp1,Exp3,Exp2p
+{,},(,),;,+,-,*,/,%,<,<=,=,==,>=,>,[,],inti,bool,string,say,sayInti,give,giveInti,hmm,nah,repeatAfterMe,true,false,ct,id,adiosBoys
+true
+Stmtlist -> Stmt | Stmt Stmtlist
+Stmt -> Declist | Ifstmt | Forstmt | Assignstmt | Returnstmt | Iostmt
+Declist -> Decl | Decl Declist
+Decl -> Type Identifier Continuation ;
+Continuation -> , Identifier Continuation | ε
+Type -> SimpType | UserType
+SimpType -> inti | bool | string
+UserType -> SimpType [ PosNumber ]
+Ifstmt -> hmm Condition { Stmtlist } Else
+Else -> nah { Smtlist } | ε
+Condition -> Expression Relation Expression
+Relation -> < | <= | == | >= | >
+Forstmt -> repeatAfterMe Forcond Forbody
+Forcond -> ( Assignstmt ; Condition; PosNumber )
+Forbody -> { Stmtlist }
+Assignstmt -> Identifier = Expression ;
+Returnstmt -> adiosBoys ;
+Iostmt -> Istmt | Ostmt
+Istmt -> IntIstmt | StringIstmt
+IntIstmt -> giveInti ( Identifier ) ;
+StringIstmt -> give ( Identifier ) ;
+Ostmt -> IntOstmt | StringOstmt
+IntOstmt -> sayInti ( IntParam ) ;
+IntParam -> Identifier | NumConst
+StringOstmt -> say ( StrParam ) ;
+StrParam -> Identifier | StrConst
+Expression -> ArithmExpr | StringExpr
+StringExpr -> StrConst | Identifier [ PosNum ] | Identifier
+ArithmExpr -> Exp2 Exp1
+Exp1 -> + Exp2 Exp1 | - Exp2 Exp1 | ε
+Exp2 -> Exp3 Exp2p
+Exp2p -> * Exp3 Exp2p | / Exp3 Exp2p | % Exp3 Exp2p | ε
+Exp3 -> ( ArithmExpr ) | ct | Identifier
+Identifier -> id
+PosNumber -> ct
+NumConst -> ct
+StrConst -> ct

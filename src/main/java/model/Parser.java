@@ -38,8 +38,8 @@ public class Parser {
             return firstTable.get(nonTerminal);
         List<String> result = new ArrayList<>();
         List<String> terminals = grammar.getTerminals();
-        //System.out.println(nonTerminal);
-        //System.out.println(grammar.getProductionsForNonTerminal(nonTerminal));
+        System.out.println(nonTerminal);
+        System.out.println(grammar.getProductionsForNonTerminal(nonTerminal));
         for (String production : grammar.getProductionsForNonTerminal(nonTerminal)) {
             List<String> productionRules = Arrays.asList(production.split(" "));
             String firstSymbol = productionRules.get(0).strip();
@@ -94,6 +94,7 @@ public class Parser {
         /*
         Gets the set version of a list
          */
+
         List<String> set = new ArrayList<>();
         for(String element: lst)
             if(!set.contains(element))
@@ -122,7 +123,6 @@ public class Parser {
                 if(nonTerminal == pair.key)
                     return values;
                 else {
-                    System.out.println(pair.key);
                     values.addAll(followOf(pair.key, startTerminal, false)); // inf recursion
 
                 }

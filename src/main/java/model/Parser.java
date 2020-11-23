@@ -15,8 +15,9 @@ public class Parser {
         this.firstTable = new HashMap<>();
         this.followTable = new HashMap<>();
         this.generateFirstTable();
-        this.generateFollowTable();
-        System.out.println(this.followTable);
+        this.followOfIterative();
+        System.out.println(followTable);
+        //System.out.println(this.followTable);
     }
 
     private void generateFirstTable(){
@@ -37,11 +38,11 @@ public class Parser {
             return firstTable.get(nonTerminal);
         List<String> result = new ArrayList<>();
         List<String> terminals = grammar.getTerminals();
-//        System.out.println(nonTerminal);
-//        System.out.println(grammar.getProductionsForNonTerminal(nonTerminal));
+        //System.out.println(nonTerminal);
+        //System.out.println(grammar.getProductionsForNonTerminal(nonTerminal));
         for (String production : grammar.getProductionsForNonTerminal(nonTerminal)) {
             List<String> productionRules = Arrays.asList(production.split(" "));
-            String firstSymbol = productionRules.get(0);
+            String firstSymbol = productionRules.get(0).strip();
             if(productionRules.size()==1) {
                 if (productionRules.get(0).equals("ε")) {
                     result.add("ε");
@@ -105,11 +106,11 @@ public class Parser {
            will generate the follow table
          */
          for(String nonTerminal: this.grammar.getNonTerminals())
-             this.followTable.put(nonTerminal, toSet(this.followOf(nonTerminal)));
+             this.followTable.put(nonTerminal, toSet(this.followOf(nonTerminal, nonTerminal, false)));
 
     }
 
-    private List<String> followOf(String nonTerminal){
+    private List<String> followOf(String nonTerminal, String startTerminal, Boolean flag){
         List<String> values = new ArrayList<>();
         if(nonTerminal.equals(this.grammar.getStartingSymbol()))
             values.add("ε");
@@ -121,17 +122,20 @@ public class Parser {
                 if(nonTerminal == pair.key)
                     return values;
                 else {
-                    values.addAll(followOf(pair.key));
+                    System.out.println(pair.key);
+                    values.addAll(followOf(pair.key, startTerminal, false)); // inf recursion
+
                 }
             }
             else{
                 List<String> firstOfRight = firstOfSequence(components.subList(index+1, components.size()));
                 if(firstOfRight.contains("ε")){
                     values.addAll(toSet(firstOfRight));
-                    values.addAll(followOf(pair.key));
+                    values.addAll(followOf(pair.key, startTerminal,false));
                     values = toSet(values);
 
                 }
+
                 values.addAll(toSet(firstOfRight));
                 values = toSet(values);
             }
@@ -169,6 +173,73 @@ public class Parser {
             return toSet(result);
         }
         return toSet(l1);
+    }
+
+
+    private void followOfIterative(){
+        HashMap<String, List<String>> previousFollow = new HashMap<>();
+        for(String nonTerminal: grammar.getNonTerminals()){
+            // initialization step
+            List<String> values = new ArrayList<>();
+            if(nonTerminal.equals(grammar.startingSymbol)){
+                values.add("ε");
+            }
+            previousFollow.put(nonTerminal, values);
+        }
+
+        while (true){
+            HashMap<String, List<String>> currentFollow = initHashMap();
+            for(String nonTerminal: grammar.getNonTerminals()){
+                currentFollow.get(nonTerminal).addAll(toSet(previousFollow.get(nonTerminal)));
+                for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
+                    List<String> components = Arrays.asList(pair.rule.split(" "));
+                    Integer index =  components.indexOf(nonTerminal);
+                    if(index == components.size()-1){
+                        if(!pair.key.equals(nonTerminal))
+                            currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.key));
+                    }
+                    else{
+                        List<String> firstValues = firstOfSequence(components.subList(index+1, components.size()));
+                        if(firstValues.contains("ε")){
+                           firstValues.remove("ε");
+                           currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.key));
+                        }
+                        currentFollow.get(nonTerminal).addAll(firstValues);
+                    }
+                }
+            }
+            for(String key: currentFollow.keySet()){
+                currentFollow.put(key,toSet(currentFollow.get(key)));
+            }
+            if(stopFollowAlgorithm(previousFollow, currentFollow)){
+                this.followTable = currentFollow;
+                return;
+            }
+            previousFollow = currentFollow;
+        }
+    }
+
+    private HashMap<String, List<String>> initHashMap(){
+        HashMap<String, List<String>> init = new HashMap<>();
+        for(String key: grammar.getNonTerminals())
+            init.put(key, new ArrayList<>());
+        return init;
+    }
+
+    private Boolean stopFollowAlgorithm(HashMap<String, List<String>> f1, HashMap<String, List<String>> f2){
+        try {
+            for (String nonTerminal : f1.keySet()) {
+                if (f1.get(nonTerminal).size() != f2.get(nonTerminal).size())
+                    return false;
+                for(String el: f1.get(nonTerminal))
+                    if(!f2.get(nonTerminal).contains(el))
+                        return false;
+            }
+            return true;
+        }
+        catch(Exception e){
+            return false;
+        }
     }
 
     private void generateParseTable(){

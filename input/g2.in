@@ -1,5 +1,6 @@
-S,A,B
-a,c,d,f,e
-S -> A B a | B A c
-A -> d | e | ε
-B -> f | ε
+S,A,B,C
+(,),int,+,*
+S -> A B
+A -> ( S ) | int C
+B -> + S | ε
+C -> * A | ε

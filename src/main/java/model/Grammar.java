@@ -75,7 +75,6 @@ public class Grammar {
             }
             this.startingSymbol = this.nonTerminals.get(0);
             reader.close();
-            System.out.println(productions);
         }
         catch (Exception e){
             System.out.println(e.getMessage());

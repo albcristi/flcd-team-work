@@ -9,6 +9,9 @@ public class Parser {
     private Grammar grammar;
     private HashMap<String, List<String>> firstTable;
     private HashMap<String, List<String>> followTable;
+    private HashMap<Pair, String>  parseTable;
+    private static String EMPTY_CELL = null;
+
 
     public Parser(Grammar grammar){
         this.grammar = grammar;
@@ -16,8 +19,9 @@ public class Parser {
         this.followTable = new HashMap<>();
         this.generateFirstTable();
         this.followOfIterative();
-        System.out.println(followTable);
-        //System.out.println(this.followTable);
+        this.initializeParseTable();
+        generateParsingTable();
+        printParseTable();
     }
 
     private void generateFirstTable(){
@@ -38,8 +42,6 @@ public class Parser {
             return firstTable.get(nonTerminal);
         List<String> result = new ArrayList<>();
         List<String> terminals = grammar.getTerminals();
-        System.out.println(nonTerminal);
-        System.out.println(grammar.getProductionsForNonTerminal(nonTerminal));
         for (String production : grammar.getProductionsForNonTerminal(nonTerminal)) {
             List<String> productionRules = Arrays.asList(production.split(" "));
             String firstSymbol = productionRules.get(0).strip();
@@ -117,13 +119,13 @@ public class Parser {
             values.add("ε");
 
         for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
-            List<String> components = Arrays.asList(pair.rule.split(" "));
+            List<String> components = Arrays.asList(pair.second.split(" "));
             Integer index =  components.indexOf(nonTerminal);
             if(index == components.size()-1){
-                if(nonTerminal == pair.key)
+                if(nonTerminal == pair.first)
                     return values;
                 else {
-                    values.addAll(followOf(pair.key, startTerminal, false)); // inf recursion
+                    values.addAll(followOf(pair.first, startTerminal, false)); // inf recursion
 
                 }
             }
@@ -131,7 +133,7 @@ public class Parser {
                 List<String> firstOfRight = firstOfSequence(components.subList(index+1, components.size()));
                 if(firstOfRight.contains("ε")){
                     values.addAll(toSet(firstOfRight));
-                    values.addAll(followOf(pair.key, startTerminal,false));
+                    values.addAll(followOf(pair.first, startTerminal,false));
                     values = toSet(values);
 
                 }
@@ -192,17 +194,17 @@ public class Parser {
             for(String nonTerminal: grammar.getNonTerminals()){
                 currentFollow.get(nonTerminal).addAll(toSet(previousFollow.get(nonTerminal)));
                 for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
-                    List<String> components = Arrays.asList(pair.rule.split(" "));
+                    List<String> components = Arrays.asList(pair.second.split(" "));
                     Integer index =  components.indexOf(nonTerminal);
                     if(index == components.size()-1){
-                        if(!pair.key.equals(nonTerminal))
-                            currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.key));
+                        if(!pair.first.equals(nonTerminal))
+                            currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.first));
                     }
                     else{
                         List<String> firstValues = firstOfSequence(components.subList(index+1, components.size()));
                         if(firstValues.contains("ε")){
                            firstValues.remove("ε");
-                           currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.key));
+                           currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.first));
                         }
                         currentFollow.get(nonTerminal).addAll(firstValues);
                     }
@@ -242,10 +244,74 @@ public class Parser {
         }
     }
 
-    private void generateParseTable(){
-         /*
-           Function that will crate the Parse Table
-         */
+    private void initializeParseTable(){
+        List<String> lines = new ArrayList<>();
+        lines.addAll(grammar.getNonTerminals());
+        lines.addAll(grammar.getTerminals());
+        lines.add("ε"); // dollar
+        List<String> columns = new ArrayList<>();
+        columns.addAll(grammar.getTerminals());
+        columns.add("ε");
+        parseTable = new HashMap<>();
+        for(String l: lines)
+            for(String c: columns){
+                if(l.equals(c) && grammar.getTerminals().contains(l)) {
+                    parseTable.put(new Pair(l, c), "pop");
+                    continue;
+                }
+                if(l.equals(c) && l.equals("ε")){
+                    parseTable.put(new Pair(l,c), "acc");
+                    continue;
+                }
+                parseTable.put(new Pair(l,c), null);
+            }
 
+    }
+
+    public void printParseTable(){
+        for(Pair pair: parseTable.keySet())
+            if(parseTable.get(pair) != null)
+                System.out.println(pair+" ---> "+parseTable.get(pair));
+    }
+
+    private void generateParsingTable(){
+        HashMap<Integer, Production> orderOfProductions = grammar.getOrderOfProductions();
+        for(Integer i: orderOfProductions.keySet()){
+            List<String> firstSet;
+            if(orderOfProductions.get(i).elements.size() == 1 && orderOfProductions.get(i).elements.contains("ε")){
+                firstSet = new ArrayList<>();
+                firstSet.add("ε");
+            }
+            else {
+                firstSet =firstOfSequence(orderOfProductions.get(i).elements);
+            }
+            if(!firstSet.contains("ε")){
+                for(String elem: firstSet){
+                    Pair pair = new Pair(orderOfProductions.get(i).leftHand, elem);
+                    String tableElement = orderOfProductions.get(i).getElementsString()+"~"+i;
+                    if(parseTable.get(pair)!=null){
+                        // ASK IF WE SHOULD STOP HERE
+                        System.out.println("!!!! CONFLICT !!!!!! At="+pair+" older: "+parseTable.get(pair)+"  new="+tableElement);
+                    }
+                    else{
+                        parseTable.put(pair,tableElement);
+                    }
+                }
+            }
+            else{
+                // if cont EPS, follow
+                List<String> followOfLine = followTable.get(orderOfProductions.get(i).leftHand);
+                for(String followVal: followOfLine){
+                    Pair pair = new Pair(orderOfProductions.get(i).leftHand, followVal);
+                    String tableElem = "ε~"+i;
+                    if(parseTable.get(pair) != null){
+                        System.out.println("!!!! CONFLICT !!!!!! At="+pair+" older: "+parseTable.get(pair)+"  new="+tableElem);
+                    }
+                    else{
+                        parseTable.put(pair,tableElem);
+                    }
+                }
+            }
+        }
     }
 }

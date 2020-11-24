@@ -10,6 +10,8 @@ public class Grammar {
     HashMap<String, List<String>> productions;
     String pathToFile;
     String startingSymbol;
+    HashMap<Integer, Production> orderOfProductions;
+
 
     public Grammar(String pathToFile){
         terminals = new ArrayList<>();
@@ -48,6 +50,8 @@ public class Grammar {
             List<String> nonTerminals = Arrays.asList(lineOfNonTerminals.split(","));
             List<String> terminalsFromFile = Arrays.asList(reader.readLine().split(","));
             List<String> terminals = new ArrayList<>();
+            orderOfProductions = new HashMap<>();
+            int index = 1;
             terminals.addAll(terminalsFromFile);
             String flag = reader.readLine();
             if(flag.equals("true")){
@@ -71,16 +75,21 @@ public class Grammar {
                     if(lst == null){
                         lst = new ArrayList<>();
                         lst.add(ele);
+                        orderOfProductions.put(index, new Production(nonTerminal, Arrays.asList(ele.split(" "))));
+                        index++;
                         productions.put(nonTerminal, lst);
                     }
                     else{
                         lst.add(ele);
+                        orderOfProductions.put(index, new Production(nonTerminal, Arrays.asList(ele.split(" "))));
+                        index++;
                     }
 
                 }
             }
             this.startingSymbol = this.nonTerminals.get(0);
             reader.close();
+           // System.out.println(orderOfProductions);
         }
         catch (Exception e){
             System.out.println(e.getMessage());
@@ -94,11 +103,15 @@ public class Grammar {
             for(String production: productions.get(key))
                 if(production.contains(nonTerminal)){
                     Pair p = new Pair();
-                    p.key=key;
-                    p.rule=production;
+                    p.first =key;
+                    p.second =production;
                     result.add(p);
                 }
         return result;
+    }
+
+    public HashMap<Integer, Production> getOrderOfProductions(){
+        return orderOfProductions;
     }
 }
 

@@ -18,11 +18,7 @@ public class Parser {
         this.followOfIterative();
         this.initializeParseTable();
         generateParsingTable();
-        for(Pair pair: parseTable.keySet()){
-            System.out.println(pair);
-            System.out.println(parseTable.get(pair));
-            System.out.println("=====");
-        }
+
 //        printParseTable();
     }
 
@@ -337,19 +333,18 @@ public class Parser {
 
         while(! (alpha.peek().equals("$") && beta.peek().equals("$")) ){
             String alphaTop = alpha.peek();
-            System.out.println("----------------");
-            System.out.println("-" + alphaTop + "-");
+           /* System.out.println("----------------");
+            System.out.println("-" + alphaTop + "-");*/
             String betaTop = beta.peek();
-            System.out.println("-" + betaTop + "-");
+            //System.out.println("-" + betaTop + "-");
             if(alphaTop.equals("$"))
                 alphaTop = "ε";
             if(betaTop.equals("$"))
                 betaTop = "ε";
             if (this.grammar.getNonTerminals().contains(betaTop)){
-                //push case
-                System.out.println("push");
+                //System.out.println("push");
                 String res = this.parseTable.get(new Pair(betaTop, alphaTop));
-                System.out.println(res);
+                //System.out.println(res);
                 if(res == null){
                     result.add(-1);
                     return result;
@@ -367,26 +362,41 @@ public class Parser {
                     for(int i=prod.size()-1; i>=0; i--){
                         if(!prod.get(i).equals(""))
                             beta.push(prod.get(i));
-                        System.out.println(beta);
+                        //System.out.println(beta);
                     }
                     result.add(prodNumber);
                 }
             }
             else if(this.grammar.getTerminals().contains(betaTop) && alphaTop.equals(betaTop)){
                 // pop case
-                System.out.println("pop");
+               // System.out.println("pop");
                 alpha.pop();
                 beta.pop();
             }
             else {
-                System.out.println("err");
+                //System.out.println("err");
                 result.add(-1);
                 return result;
             }
 
         }
-
         result.add(-2);
         return result;
     }
+
+    public Grammar getGrammar(){
+        return this.grammar;
+    }
+
+    public Production getProductionByOrderNumber(Integer prodNumber){
+        for(Integer key: grammar.orderOfProductions.keySet())
+            if(key == prodNumber)
+                return grammar.orderOfProductions.get(key);
+        Production production = new Production();
+        production.elements=null;
+        production.leftHand="-1";
+        return production;
+    }
+
+
 }

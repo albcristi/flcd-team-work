@@ -1,5 +1,6 @@
 import model.Grammar;
 import model.Parser;
+import model.ParserOutput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,16 +34,12 @@ public class Main {
 //        seq.add(")");
 //        seq.add(";");
 
-        seq.add("(");
         seq.add("a");
         seq.add("+");
         seq.add("a");
-        seq.add(")");
-        seq.add("*");
-        seq.add("a");
-        seq.add("+");
-        //seq.add("a");
-        System.out.println(p.parseSequence(seq));
+
+        ParserOutput po = new ParserOutput(p, p.parseSequence(seq));
+        //System.out.println(p.parseSequence(seq));
 
     }
 }

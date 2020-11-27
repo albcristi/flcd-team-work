@@ -1,11 +1,14 @@
 import model.Grammar;
 import model.Parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("aaa");
-        Grammar g = new Grammar("./input/g2.in");
+        Grammar g = new Grammar("./input/g1.in");
         /*
         System.out.println("Grammar non-terminals");
         System.out.println(g.getNonTerminals());
@@ -19,8 +22,27 @@ public class Main {
         System.out.println(g.getProductionsForNonTerminal("A"));
         */
         Parser p = new Parser(g);
+        p.printParseTable();
+        List<String> seq = new ArrayList<>();
+//        seq.add("inti");
+//        seq.add("id");
+//        seq.add(";");
+//        seq.add("sayInti");
+//        seq.add("(");
+//        seq.add("id");
+//        seq.add(")");
+//        seq.add(";");
 
-
+        seq.add("(");
+        seq.add("a");
+        seq.add("+");
+        seq.add("a");
+        seq.add(")");
+        seq.add("*");
+        seq.add("a");
+        seq.add("+");
+        //seq.add("a");
+        System.out.println(p.parseSequence(seq));
 
     }
 }

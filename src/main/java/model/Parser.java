@@ -1,9 +1,6 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
     private Grammar grammar;
@@ -21,7 +18,12 @@ public class Parser {
         this.followOfIterative();
         this.initializeParseTable();
         generateParsingTable();
-        printParseTable();
+        for(Pair pair: parseTable.keySet()){
+            System.out.println(pair);
+            System.out.println(parseTable.get(pair));
+            System.out.println("=====");
+        }
+//        printParseTable();
     }
 
     private void generateFirstTable(){
@@ -260,7 +262,7 @@ public class Parser {
                     continue;
                 }
                 if(l.equals(c) && l.equals("ε")){
-                    parseTable.put(new Pair(l,c), "acc");
+                    parseTable.put(new Pair(l,c),"acc");
                     continue;
                 }
                 parseTable.put(new Pair(l,c), null);
@@ -294,6 +296,7 @@ public class Parser {
                         System.out.println("!!!! CONFLICT !!!!!! At="+pair+" older: "+parseTable.get(pair)+"  new="+tableElement);
                     }
                     else{
+                        parseTable.remove(pair);
                         parseTable.put(pair,tableElement);
                     }
                 }
@@ -308,10 +311,82 @@ public class Parser {
                         System.out.println("!!!! CONFLICT !!!!!! At="+pair+" older: "+parseTable.get(pair)+"  new="+tableElem);
                     }
                     else{
+                        parseTable.remove(pair);
                         parseTable.put(pair,tableElem);
                     }
                 }
             }
         }
+    }
+
+
+    public List<Integer> parseSequence(List<String> sequence){
+        //returns a list -> on the last position we have -1 (if error) or -2 (if acc)
+
+        //initialize first stack
+        Stack<String> alpha = new Stack<>();
+        Stack<String> beta = new Stack<>();
+        List<Integer> result = new ArrayList<>();
+
+        alpha.push("$");
+        for(int i = sequence.size()-1; i >=0;i--)
+            alpha.push(sequence.get(i));
+
+        beta.push("$");
+        beta.push(this.grammar.getStartingSymbol());
+
+        while(! (alpha.peek().equals("$") && beta.peek().equals("$")) ){
+            String alphaTop = alpha.peek();
+            System.out.println("----------------");
+            System.out.println("-" + alphaTop + "-");
+            String betaTop = beta.peek();
+            System.out.println("-" + betaTop + "-");
+            if(alphaTop.equals("$"))
+                alphaTop = "ε";
+            if(betaTop.equals("$"))
+                betaTop = "ε";
+            if (this.grammar.getNonTerminals().contains(betaTop)){
+                //push case
+                System.out.println("push");
+                String res = this.parseTable.get(new Pair(betaTop, alphaTop));
+                System.out.println(res);
+                if(res == null){
+                    result.add(-1);
+                    return result;
+                }
+                String[] res_split = res.split("~");
+                List<String> prod = Arrays.asList(res_split[0].split(" "));
+                Integer prodNumber = Integer.parseInt(res_split[1]);
+
+                if(prod.get(0).equals("ε")){
+                    beta.pop();
+                    result.add(prodNumber);
+                }
+                else{
+                    beta.pop();
+                    for(int i=prod.size()-1; i>=0; i--){
+                        if(!prod.get(i).equals(""))
+                            beta.push(prod.get(i));
+                        System.out.println(beta);
+                    }
+                    result.add(prodNumber);
+                }
+            }
+            else if(this.grammar.getTerminals().contains(betaTop) && alphaTop.equals(betaTop)){
+                // pop case
+                System.out.println("pop");
+                alpha.pop();
+                beta.pop();
+            }
+            else {
+                System.out.println("err");
+                result.add(-1);
+                return result;
+            }
+
+        }
+
+        result.add(-2);
+        return result;
     }
 }

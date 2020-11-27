@@ -1,9 +1,11 @@
-Stmtlist,Stmt,Declist,Ifstmt,Forstmt,Assignstmt,Returnstmt,Iostmt,Decl,Type,Identifier,Continuation,SimpType,UserType,PosNumber,Condition,Else,Expression,Relation,Forcond,Forbody,Istmt,Ostmt,IntIstmt,StringIstmt,IntOstmt,StringOstmt,IntParam,NumConst,StrParam,StrConst,ArithmExpr,StringExpr,Exp2,Exp1,Exp3,Exp2p
+Stmtlist,E,F,Stmt,Declist,Ifstmt,Forstmt,Assignstmt,Returnstmt,Iostmt,Decl,Type,Identifier,Continuation,SimpType,UserType,PosNumber,Condition,Else,Expression,Relation,Forcond,Forbody,Istmt,Ostmt,IntIstmt,StringIstmt,IntOstmt,StringOstmt,IntParam,NumConst,StrParam,StrConst,ArithmExpr,StringExpr,Exp2,Exp1,Exp3,Exp2p
 {,},(,),;,+,-,*,/,%,<,<=,=,==,>=,>,[,],inti,bool,string,say,sayInti,give,giveInti,hmm,nah,repeatAfterMe,true,false,ct,id,adiosBoys
 true
-Stmtlist -> Stmt | Stmt Stmtlist
+Stmtlist -> Stmt E
+E -> Stmtlist | ε
 Stmt -> Declist | Ifstmt | Forstmt | Assignstmt | Returnstmt | Iostmt
-Declist -> Decl | Decl Declist
+Declist -> Decl F
+F -> Declist | ε
 Decl -> Type Identifier Continuation ;
 Continuation -> , Identifier Continuation | ε
 Type -> SimpType | UserType

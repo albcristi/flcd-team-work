@@ -9,36 +9,29 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("aaa");
-        Grammar g = new Grammar("./input/g1.in");
-        /*
-        System.out.println("Grammar non-terminals");
-        System.out.println(g.getNonTerminals());
-        System.out.println("Grammar terminals");
-        System.out.println(g.getTerminals());
-        System.out.println("Grammar productions");
-        System.out.println(g.getProductions());
-        System.out.println("Productions for terminal S");
-        System.out.println(g.getProductionsForNonTerminal("S"));
-        System.out.println("Productions for terminal A");
-        System.out.println(g.getProductionsForNonTerminal("A"));
-        */
+        Grammar g = new Grammar("./input/g2.in");
         Parser p = new Parser(g);
         p.printParseTable();
         List<String> seq = new ArrayList<>();
-//        seq.add("inti");
-//        seq.add("id");
-//        seq.add(";");
-//        seq.add("sayInti");
-//        seq.add("(");
-//        seq.add("id");
-//        seq.add(")");
-//        seq.add(";");
+        seq.add("inti");
+        seq.add("id");
+        seq.add(";");
+        seq.add("sayInti");
+        seq.add("(");
+        seq.add("id");
+        seq.add(")");
+        seq.add(";");
 
-        seq.add("a");
-        seq.add("+");
-        seq.add("a");
+//        seq.add("(");
+//        seq.add("a");
+//        seq.add("+");
+//        seq.add("a");
+//        seq.add(")");
+//        seq.add("+");
+//        seq.add("a");
 
         ParserOutput po = new ParserOutput(p, p.parseSequence(seq));
+        po.generateSequence();
         //System.out.println(p.parseSequence(seq));
 
     }

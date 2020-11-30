@@ -116,4 +116,33 @@ public class ParserOutput {
         System.out.println(sequence);
         return sequence;
     }
+
+    public void printNodes(){
+        Stack<Node> nodes = new Stack<>();
+        nodes.push(root);
+        System.out.println("Value: "+root.getValue()+" Index: "+root.getIndex()+" Parent: "
+                +root.getParent()+" Sibling: "+root.getSibling());
+        while (!nodes.isEmpty()){
+            Node currentNode = nodes.peek();
+            if(parser.getGrammar().getTerminals().contains(currentNode.getValue()) || currentNode.getValue().equals("ε")){
+                while (!nodes.isEmpty() && !nodes.peek().getHasRight()){
+                    nodes.pop();
+                }
+                if(!nodes.isEmpty())
+                    nodes.pop();
+                if(nodes.isEmpty())
+                    break;
+                continue;
+            }
+            List<Node> children = this.getChildren(currentNode.getIndex());
+            for(int idx = children.size()-1; idx>=0; idx--){
+                System.out.println("Value: "+children.get(children.size()-idx-1).getValue()+" Index: "+children.get(children.size()-idx-1).getIndex()+" Parent: "
+                        +children.get(children.size()-idx-1).getParent()+" Sibling: "+children.get(children.size()-idx-1).getSibling());
+                nodes.push(children.get(idx));
+            }
+        }
+    }
+    public void writeToFile(){
+
+    }
 }

@@ -25,6 +25,7 @@ public class ParserOutput {
         node.setParent(-1);
         node.setSibling(-1);
         node.setIndex(nodeNumber);
+        node.setHasRight(false);
         nodeNumber++;
         node.setValue(parser.getProductionByOrderNumber(productions.get(0)).leftHand);
         this.root = node;
@@ -33,10 +34,15 @@ public class ParserOutput {
         nodeList.add(this.root);
         while (prodListIndex < productions.size() && !nodes.isEmpty()){
             Node currentNode = nodes.peek(); // so that we know the father
-            if(parser.getGrammar().getTerminals().contains(currentNode.getValue())){
-                nodes.pop();
-                while(!nodes.isEmpty() && !nodes.peek().getHasRight())
+            if(parser.getGrammar().getTerminals().contains(currentNode.getValue()) || currentNode.getValue().equals("ε")){
+
+                while(nodes.size()>0 && !nodes.peek().getHasRight()) {
                     nodes.pop();
+                }
+                if(nodes.size() > 0)
+                    nodes.pop();
+                else
+                    break;
                 continue;
             }
             Production prod = parser.getProductionByOrderNumber(productions.get(prodListIndex));
@@ -63,9 +69,6 @@ public class ParserOutput {
                 }
                 child.setValue(children.get(pos));
                 nodes.push(child);
-                System.out.println("----");
-                System.out.println(currentNode);
-                System.out.println(child);
                 nodeList.add(child);
             }
             nodeNumber += children.size()+1;

@@ -33,6 +33,7 @@ public class Main {
         ParserOutput po = new ParserOutput(p, p.parseSequence(seq));
         po.generateSequence();
         po.printNodes();
+        po.writeToFile();
         //System.out.println(p.parseSequence(seq));
 
     }

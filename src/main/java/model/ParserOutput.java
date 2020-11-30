@@ -1,5 +1,7 @@
 package model;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -104,7 +106,7 @@ public class ParserOutput {
                 }
                 if(!nodes.isEmpty())
                     nodes.pop();
-                if(nodes.isEmpty())
+                else
                     break;
                 continue;
             }
@@ -113,7 +115,6 @@ public class ParserOutput {
                 nodes.push(children.get(idx));
             }
         }
-        System.out.println(sequence);
         return sequence;
     }
 
@@ -143,6 +144,27 @@ public class ParserOutput {
         }
     }
     public void writeToFile(){
+        try {
+            /*
+                File structure:
+                INDEX space VALUE space PARENT space SIBLING space HAS_RIGHT
+             */
+            FileWriter fileWriter = new FileWriter("./output/tree.txt");
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            for(Node node: nodeList) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(node.getIndex()).append(" ");
+                builder.append(node.getValue()).append(" ");
+                builder.append(node.getParent()).append(" ");
+                builder.append(node.getSibling()).append(" ");
+                builder.append(node.getHasRight() ? 1 : 0);
+                printWriter.println(builder.toString());
+            }
+            fileWriter.close();
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
 
     }
 }

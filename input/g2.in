@@ -1,41 +1,40 @@
-Stmtlist,E,F,Stmt,Declist,Ifstmt,Forstmt,Assignstmt,Returnstmt,Iostmt,Decl,Type,Identifier,Continuation,SimpType,UserType,PosNumber,Condition,Else,Expression,Relation,Forcond,Forbody,Istmt,Ostmt,IntIstmt,StringIstmt,IntOstmt,StringOstmt,IntParam,NumConst,StrParam,StrConst,ArithmExpr,StringExpr,Exp2,Exp1,Exp3,Exp2p
-{,},(,),;,+,-,*,/,%,<,<=,=,==,>=,>,[,],inti,bool,string,say,sayInti,give,giveInti,hmm,nah,repeatAfterMe,true,false,ct,id,adiosBoys
+Stmtlist,ContCond,E,Stmt,Cont1,Ifstmt,Forstmt,Assignstmt,Returnstmt,Iostmt,Decl,Type,Identifier,Continuation,SimpType,PosNumber,Condition,Else,Expression,Relation,Forcond,Forbody,Istmt,Ostmt,IntIstmt,StringIstmt,IntOstmt,StringOstmt,IntParam,NumConst,StrParam,StrConst,ArithmExpr,StringExpr,Exp2,Exp1,Exp3,Exp2p
+integer,str,{,},(,),;,+,-,*,/,%,<,<=,=,==,>=,>,[,],inti,bool,string,say,sayInti,give,giveInti,hmm,nah,repeatAfterMe,true,false,ct,id,adiosBoys,and,or
 true
 Stmtlist -> Stmt E
 E -> Stmtlist | ε
-Stmt -> Declist | Ifstmt | Forstmt | Assignstmt | Returnstmt | Iostmt
-Declist -> Decl F
-F -> Declist | ε
+Stmt -> Decl | Ifstmt | Forstmt | Assignstmt | Returnstmt | Iostmt
 Decl -> Type Identifier Continuation ;
 Continuation -> , Identifier Continuation | ε
-Type -> SimpType | UserType
-SimpType -> inti | bool | string
-UserType -> SimpType [ PosNumber ]
-Ifstmt -> hmm Condition { Stmtlist } Else
-Else -> nah { Smtlist } | ε
-Condition -> Expression Relation Expression
+Type -> SimpType
+SimpType -> inti | bool | string | integer [ ct ], str [ ct ]
+Ifstmt -> hmm ( Condition ) { Stmtlist } Else
+Else -> nah { Stmtlist } | ε
+Condition -> Expression Relation Expression ContCond
+ContCond -> and Condition | or Condition | ε
 Relation -> < | <= | == | >= | >
 Forstmt -> repeatAfterMe Forcond Forbody
-Forcond -> ( Assignstmt ; Condition; PosNumber )
+Forcond -> ( Assignstmt Condition ; ct )
 Forbody -> { Stmtlist }
-Assignstmt -> Identifier = Expression ;
+Assignstmt -> id = Expression ;
 Returnstmt -> adiosBoys ;
 Iostmt -> Istmt | Ostmt
 Istmt -> IntIstmt | StringIstmt
-IntIstmt -> giveInti ( Identifier ) ;
-StringIstmt -> give ( Identifier ) ;
+IntIstmt -> giveInti ( id ) ;
+StringIstmt -> give ( id ) ;
 Ostmt -> IntOstmt | StringOstmt
 IntOstmt -> sayInti ( IntParam ) ;
-IntParam -> Identifier | NumConst
+IntParam -> id | ct
 StringOstmt -> say ( StrParam ) ;
-StrParam -> Identifier | StrConst
-Expression -> ArithmExpr | StringExpr
-StringExpr -> StrConst | Identifier [ PosNum ] | Identifier
+StrParam -> id | ct
+Expression -> ArithmExpr
+StringExpr -> ct | id Cont1
+Cont1 ->  [ ct ] | ε
 ArithmExpr -> Exp2 Exp1
 Exp1 -> + Exp2 Exp1 | - Exp2 Exp1 | ε
 Exp2 -> Exp3 Exp2p
 Exp2p -> * Exp3 Exp2p | / Exp3 Exp2p | % Exp3 Exp2p | ε
-Exp3 -> ( ArithmExpr ) | ct | Identifier
+Exp3 -> ( ArithmExpr ) | id Cont1 | ct
 Identifier -> id
 PosNumber -> ct
 NumConst -> ct

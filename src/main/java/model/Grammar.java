@@ -39,6 +39,7 @@ public class Grammar {
     }
 
     public List<String> getProductionsForNonTerminal(String nonTerminal){
+
         return this.productions.get(nonTerminal);
     }
 
@@ -100,13 +101,19 @@ public class Grammar {
     public List<Pair> getRulesThatContainNonTerminal(String nonTerminal){
         List<Pair> result = new ArrayList<>();
         for(String  key: productions.keySet())
-            for(String production: productions.get(key))
-                if(production.contains(nonTerminal)){
+            for(String production: productions.get(key)) {
+                List<String> components = Arrays.asList(production.split(" "));
+                if (components.contains(nonTerminal)) {
+//                    System.out.println("----GET RULES NON TERMINAL --");
+//                    System.out.println(key);
+//                    System.out.println(production);
+//                    System.out.println("---XXXX----XXX---");
                     Pair p = new Pair();
-                    p.first =key;
-                    p.second =production;
+                    p.first = key;
+                    p.second = production;
                     result.add(p);
                 }
+            }
         return result;
     }
 

@@ -1,5 +1,7 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.*;
 
 public class Parser {
@@ -18,8 +20,6 @@ public class Parser {
         this.followOfIterative();
         this.initializeParseTable();
         generateParsingTable();
-
-//        printParseTable();
     }
 
     private void generateFirstTable(){
@@ -101,6 +101,7 @@ public class Parser {
                 set.add(element);
         return set;
     }
+
     private void generateFollowTable(){
          /*
            Function that, based on the FOLLOW algorithm,
@@ -191,6 +192,10 @@ public class Parser {
             HashMap<String, List<String>> currentFollow = initHashMap();
             for(String nonTerminal: grammar.getNonTerminals()){
                 currentFollow.get(nonTerminal).addAll(toSet(previousFollow.get(nonTerminal)));
+//                System.out.println("---PRODCUTIONS OF----");
+//                System.out.println(nonTerminal);
+//                System.out.println(grammar.getRulesThatContainNonTerminal(nonTerminal));
+//                System.out.println("XXXXX_---_X_XXX");
                 for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
                     List<String> components = Arrays.asList(pair.second.split(" "));
                     Integer index =  components.indexOf(nonTerminal);
@@ -202,7 +207,8 @@ public class Parser {
                         List<String> firstValues = firstOfSequence(components.subList(index+1, components.size()));
                         if(firstValues.contains("ε")){
                            firstValues.remove("ε");
-                           currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.first));
+                           if(!nonTerminal.equals(pair.first))
+                                 currentFollow.get(nonTerminal).addAll(previousFollow.get(pair.first));
                         }
                         currentFollow.get(nonTerminal).addAll(firstValues);
                     }
@@ -272,16 +278,35 @@ public class Parser {
                 System.out.println(pair+" ---> "+parseTable.get(pair));
     }
 
+
     private void generateParsingTable(){
+        __generateParsingTable();
+        //_generateParsingTable();
+    }
+
+
+    private void __generateParsingTable(){
         HashMap<Integer, Production> orderOfProductions = grammar.getOrderOfProductions();
         for(Integer i: orderOfProductions.keySet()){
             List<String> firstSet;
             if(orderOfProductions.get(i).elements.size() == 1 && orderOfProductions.get(i).elements.contains("ε")){
                 firstSet = new ArrayList<>();
                 firstSet.add("ε");
+//                System.out.println("--FIRST--");
+//                System.out.println(orderOfProductions.get(i).leftHand+"-> EPS");
+//                System.out.println(firstSet);
+//                System.out.println("---END FIRST--");
+
             }
             else {
+//                System.out.println("--FIRST--");
+//                System.out.println(orderOfProductions.get(i).leftHand+"->"+orderOfProductions.get(i).elements);
                 firstSet =firstOfSequence(orderOfProductions.get(i).elements);
+//                System.out.println(firstSet);
+//                System.out.println("---END FIRST---");
+//                System.out.println("---FOLLOW----");
+//                System.out.println(orderOfProductions.get(i).leftHand);
+//                System.out.println(followTable.get(orderOfProductions.get(i).leftHand));
             }
             if(!firstSet.contains("ε")){
                 for(String elem: firstSet){
@@ -299,10 +324,14 @@ public class Parser {
             }
             else{
                 // if cont EPS, follow
+//                System.out.println("---FOLLOW----");
+//                System.out.println(orderOfProductions.get(i).leftHand);
+//                System.out.println(followTable.get(orderOfProductions.get(i).leftHand));
+//                System.out.println("---END Follow----");
                 List<String> followOfLine = followTable.get(orderOfProductions.get(i).leftHand);
                 for(String followVal: followOfLine){
                     Pair pair = new Pair(orderOfProductions.get(i).leftHand, followVal);
-                    String tableElem = "ε~"+i;
+                    String tableElem = orderOfProductions.get(i).getElementsString()+"~"+i; // TODO: CHECK IF THIS IS A PROBLEM <<< old value = tableElem
                     if(parseTable.get(pair) != null){
                         System.out.println("!!!! CONFLICT !!!!!! At="+pair+" older: "+parseTable.get(pair)+"  new="+tableElem);
                     }
@@ -331,12 +360,16 @@ public class Parser {
         beta.push("$");
         beta.push(this.grammar.getStartingSymbol());
 
-        while(! (alpha.peek().equals("$") && beta.peek().equals("$")) ){
+        while(!(alpha.peek().equals("$") && beta.peek().equals("$")) ){
             String alphaTop = alpha.peek();
            /* System.out.println("----------------");
             System.out.println("-" + alphaTop + "-");*/
             String betaTop = beta.peek();
             //System.out.println("-" + betaTop + "-");
+//            System.out.println("----");
+//            System.out.println(alpha);
+//            System.out.println(beta);
+//            System.out.println(result);
             if(alphaTop.equals("$"))
                 alphaTop = "ε";
             if(betaTop.equals("$"))
@@ -346,6 +379,11 @@ public class Parser {
                 String res = this.parseTable.get(new Pair(betaTop, alphaTop));
                 //System.out.println(res);
                 if(res == null){
+//                    System.out.println("SYNTAX ERROR: ");
+//                    System.out.println("Stack:");
+//                    System.out.println(alpha);
+//                    System.out.println("Missing");
+//                    System.out.println(betaTop);
                     result.add(-1);
                     return result;
                 }
@@ -360,7 +398,7 @@ public class Parser {
                 else{
                     beta.pop();
                     for(int i=prod.size()-1; i>=0; i--){
-                        if(!prod.get(i).equals(""))
+                        if(!prod.get(i).equals("") && !prod.get(i).equals("ε"))
                             beta.push(prod.get(i));
                         //System.out.println(beta);
                     }
@@ -368,13 +406,15 @@ public class Parser {
                 }
             }
             else if(this.grammar.getTerminals().contains(betaTop) && alphaTop.equals(betaTop)){
-                // pop case
-               // System.out.println("pop");
                 alpha.pop();
                 beta.pop();
             }
             else {
-                //System.out.println("err");
+                System.out.println("SYNTAX ERROR: ");
+                System.out.println("Stack:");
+                System.out.println(alpha);
+                System.out.println("Missing");
+                System.out.println(betaTop);
                 result.add(-1);
                 return result;
             }
@@ -398,5 +438,37 @@ public class Parser {
         return production;
     }
 
-
+    public List<String> readPIF(String path){
+        try {
+            List<String> elems = new ArrayList<>();
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            String noLines = reader.readLine();
+            Integer lines = Integer.parseInt(noLines);
+            Integer idx = 0;
+            while (idx<lines){
+                List<String> lst = Arrays.asList(reader.readLine().split(","));
+                if(lst.contains(""))
+                    elems.add(",");
+                else {
+                    Boolean ex = false;
+                    if(lst.get(1).equals("ID")) {
+                        ex = true;
+                        elems.add("id");
+                    }
+                    if(lst.get(1).equals("CONST")) {
+                        ex = true;
+                        elems.add("ct");
+                    }
+                    if(!ex)
+                       elems.add(lst.get(1));
+                }
+                idx++;
+            }
+            reader.close();
+            return elems;
+        }
+        catch (Exception e){
+            return new ArrayList<>();
+        }
+    }
 }

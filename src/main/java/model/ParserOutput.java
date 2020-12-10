@@ -14,15 +14,22 @@ public class ParserOutput {
     private Node root;
     private List<Integer> productions;
     private List<Node> nodeList;
+    private Boolean hasErrors = false;
 
     public ParserOutput(Parser parser, List<Integer> productions){
         this.parser = parser;
+        if(productions.contains(-1))
+            hasErrors = true;
         productions.remove(productions.size()-1);
         this.productions = productions;
         generateTree();
     }
 
     private void generateTree(){
+        if(hasErrors){
+            return;
+        }
+
         Stack<Node> nodes = new Stack<>();
         Integer prodListIndex = 0;
         Node node = new Node();
@@ -93,6 +100,10 @@ public class ParserOutput {
 
 
     public List<String> generateSequence(){
+        if(hasErrors) {
+            System.out.println("Can not parse sequence");
+            return null;
+        }
         List<String> sequence = new ArrayList<>();
         Stack<Node> nodes = new Stack<>();
         nodes.push(root);
@@ -119,6 +130,8 @@ public class ParserOutput {
     }
 
     public void printNodes(){
+        if(hasErrors)
+            return;
         Stack<Node> nodes = new Stack<>();
         nodes.push(root);
         System.out.println("Value: "+root.getValue()+" Index: "+root.getIndex()+" Parent: "
@@ -143,22 +156,27 @@ public class ParserOutput {
             }
         }
     }
-    public void writeToFile(){
+    public void writeToFile(String path){
         try {
             /*
                 File structure:
                 INDEX space VALUE space PARENT space SIBLING space HAS_RIGHT
              */
-            FileWriter fileWriter = new FileWriter("./output/tree.txt");
+            FileWriter fileWriter = new FileWriter(path);
             PrintWriter printWriter = new PrintWriter(fileWriter);
-            for(Node node: nodeList) {
-                StringBuilder builder = new StringBuilder();
-                builder.append(node.getIndex()).append(" ");
-                builder.append(node.getValue()).append(" ");
-                builder.append(node.getParent()).append(" ");
-                builder.append(node.getSibling()).append(" ");
-                builder.append(node.getHasRight() ? 1 : 0);
-                printWriter.println(builder.toString());
+            if(!hasErrors) {
+                for (Node node : nodeList) {
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(node.getIndex()).append(" ");
+                    builder.append(node.getValue()).append(" ");
+                    builder.append(node.getParent()).append(" ");
+                    builder.append(node.getSibling()).append(" ");
+                    builder.append(node.getHasRight() ? 1 : 0);
+                    printWriter.println(builder.toString());
+                }
+            }
+            else{
+                printWriter.println("Sequence is not syntactically correct");
             }
             fileWriter.close();
         }

@@ -192,10 +192,6 @@ public class Parser {
             HashMap<String, List<String>> currentFollow = initHashMap();
             for(String nonTerminal: grammar.getNonTerminals()){
                 currentFollow.get(nonTerminal).addAll(toSet(previousFollow.get(nonTerminal)));
-//                System.out.println("---PRODCUTIONS OF----");
-//                System.out.println(nonTerminal);
-//                System.out.println(grammar.getRulesThatContainNonTerminal(nonTerminal));
-//                System.out.println("XXXXX_---_X_XXX");
                 for(Pair pair: this.grammar.getRulesThatContainNonTerminal(nonTerminal)){
                     List<String> components = Arrays.asList(pair.second.split(" "));
                     Integer index =  components.indexOf(nonTerminal);
@@ -281,7 +277,6 @@ public class Parser {
 
     private void generateParsingTable(){
         __generateParsingTable();
-        //_generateParsingTable();
     }
 
 
@@ -292,21 +287,9 @@ public class Parser {
             if(orderOfProductions.get(i).elements.size() == 1 && orderOfProductions.get(i).elements.contains("ε")){
                 firstSet = new ArrayList<>();
                 firstSet.add("ε");
-//                System.out.println("--FIRST--");
-//                System.out.println(orderOfProductions.get(i).leftHand+"-> EPS");
-//                System.out.println(firstSet);
-//                System.out.println("---END FIRST--");
-
             }
             else {
-//                System.out.println("--FIRST--");
-//                System.out.println(orderOfProductions.get(i).leftHand+"->"+orderOfProductions.get(i).elements);
                 firstSet =firstOfSequence(orderOfProductions.get(i).elements);
-//                System.out.println(firstSet);
-//                System.out.println("---END FIRST---");
-//                System.out.println("---FOLLOW----");
-//                System.out.println(orderOfProductions.get(i).leftHand);
-//                System.out.println(followTable.get(orderOfProductions.get(i).leftHand));
             }
             if(!firstSet.contains("ε")){
                 for(String elem: firstSet){
@@ -323,11 +306,6 @@ public class Parser {
                 }
             }
             else{
-                // if cont EPS, follow
-//                System.out.println("---FOLLOW----");
-//                System.out.println(orderOfProductions.get(i).leftHand);
-//                System.out.println(followTable.get(orderOfProductions.get(i).leftHand));
-//                System.out.println("---END Follow----");
                 List<String> followOfLine = followTable.get(orderOfProductions.get(i).leftHand);
                 for(String followVal: followOfLine){
                     Pair pair = new Pair(orderOfProductions.get(i).leftHand, followVal);
@@ -347,7 +325,6 @@ public class Parser {
 
     public List<Integer> parseSequence(List<String> sequence){
         //returns a list -> on the last position we have -1 (if error) or -2 (if acc)
-
         //initialize first stack
         Stack<String> alpha = new Stack<>();
         Stack<String> beta = new Stack<>();
@@ -362,28 +339,19 @@ public class Parser {
 
         while(!(alpha.peek().equals("$") && beta.peek().equals("$")) ){
             String alphaTop = alpha.peek();
-           /* System.out.println("----------------");
-            System.out.println("-" + alphaTop + "-");*/
             String betaTop = beta.peek();
-            //System.out.println("-" + betaTop + "-");
-//            System.out.println("----");
-//            System.out.println(alpha);
-//            System.out.println(beta);
-//            System.out.println(result);
             if(alphaTop.equals("$"))
                 alphaTop = "ε";
             if(betaTop.equals("$"))
                 betaTop = "ε";
             if (this.grammar.getNonTerminals().contains(betaTop)){
-                //System.out.println("push");
                 String res = this.parseTable.get(new Pair(betaTop, alphaTop));
-                //System.out.println(res);
                 if(res == null){
-//                    System.out.println("SYNTAX ERROR: ");
-//                    System.out.println("Stack:");
-//                    System.out.println(alpha);
-//                    System.out.println("Missing");
-//                    System.out.println(betaTop);
+                    System.out.println("SYNTAX ERROR: ");
+                    System.out.println("Stack:");
+                    System.out.println(alpha);
+                    System.out.println("Missing");
+                    System.out.println(betaTop);
                     result.add(-1);
                     return result;
                 }
@@ -400,7 +368,6 @@ public class Parser {
                     for(int i=prod.size()-1; i>=0; i--){
                         if(!prod.get(i).equals("") && !prod.get(i).equals("ε"))
                             beta.push(prod.get(i));
-                        //System.out.println(beta);
                     }
                     result.add(prodNumber);
                 }
@@ -464,6 +431,19 @@ public class Parser {
                 }
                 idx++;
             }
+            reader.close();
+            return elems;
+        }
+        catch (Exception e){
+            return new ArrayList<>();
+        }
+    }
+
+    public List<String> readSequenceTXT(String path){
+        try {
+            List<String> elems;
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            elems = Arrays.asList(reader.readLine().split(" "));
             reader.close();
             return elems;
         }

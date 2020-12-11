@@ -90,7 +90,6 @@ public class Grammar {
             }
             this.startingSymbol = this.nonTerminals.get(0);
             reader.close();
-           // System.out.println(orderOfProductions);
         }
         catch (Exception e){
             System.out.println(e.getMessage());
@@ -104,10 +103,6 @@ public class Grammar {
             for(String production: productions.get(key)) {
                 List<String> components = Arrays.asList(production.split(" "));
                 if (components.contains(nonTerminal)) {
-//                    System.out.println("----GET RULES NON TERMINAL --");
-//                    System.out.println(key);
-//                    System.out.println(production);
-//                    System.out.println("---XXXX----XXX---");
                     Pair p = new Pair();
                     p.first = key;
                     p.second = production;
